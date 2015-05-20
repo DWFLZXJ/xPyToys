@@ -1,139 +1,100 @@
 #!/usr/bin/env python
-# -*- coding:utf-8 -*-
-import codecs
-import cookielib
-import json
+# encoding: utf-8
+import random
 
 import sys
-import urllib
-import urllib2
-import time
 import datetime
+import re
+import os
+import time
+from PIL import Image
 
 reload(sys)
-sys.setdefaultencoding("utf-8")
+sys.setdefaultencoding('utf-8')
+from weibo import Client
 
-import re
-import base64
-import binascii
-import rsa
-
-cj = cookielib.CookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-
-
-def login_weibo(username, password):
-    try:
-        prelogin_url = 'http://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCal' \
-                       'lBack&su=%s&rsakt=mod&checkpin=1&client=ssologin.js(v1.4.15)&_=1400822309846' % username
-        pre_login_data = opener.open(prelogin_url).read().decode('utf-8')
-        servertime = re.findall('"servertime":(.*?),', pre_login_data)[0]
-        pubkey = re.findall('"pubkey":"(.*?)",', pre_login_data)[0]
-        rsakv = re.findall('"rsakv":"(.*?)",', pre_login_data)[0]
-        nonce = re.findall('"nonce":"(.*?)",', pre_login_data)[0]
-        su = base64.b64encode(bytes(urllib.quote(username)))
-        rsa_publickey = int(pubkey, 16)
-        key = rsa.PublicKey(rsa_publickey, 65537)
-        message = bytes(str(servertime) + '\t' + str(nonce) + '\n' + str(password))
-        sp = binascii.b2a_hex(rsa.encrypt(message, key))
-        param = {
-            'entry': 'weibo',
-            'gateway': 1,
-            'from': '',
-            'savestate': 7,
-            'useticket': 1,
-            'pagerefer': 'http://login.sina.com.cn/sso/logout.php?entry=miniblog&r=http%3A%2F%2Fweibo.com%2Flogout.php%3Fbackurl%3D',
-            'vsnf': 1,
-            'su': su,
-            'service': 'miniblog',
-            'servertime': servertime,
-            'nonce': nonce,
-            'pwencode': 'rsa2',
-            'rsakv': rsakv,
-            'sp': sp,
-            'sr': '1680*1050',
-            'encoding': 'UTF-8',
-            'prelt': 961,
-            'url': 'http://weibo.com/ajaxlogin.php?framelogin=1&callback=parent.sinaSSOController.feedBackUrlCallBack'
-        }
-        data = urllib.urlencode(param).encode('utf-8')
-        s = opener.open('http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)', data).read().decode('gbk')
-        urll = re.findall("location.replace\(\'(.*?)\'\);", s)[0]
-        opener.open(urll).read()
-
-        return True
-    except:
-        return False
+APP_KEY = ''  # app key
+APP_SECRET = ''  # app secret
+CALLBACK_URL = ''  # callback url
+AUTH_URL = ''
+USERID = ''  # userid
+PASSWD = ''  # password
 
 
-def post_weibo(content):
-    if not login_weibo(USERNAME, PASSWORD):
-        print 'login error, exit.'
-        return
-    post_data = urllib.urlencode({
-        'location': 'v6_content_home',
-        'appkey': '',
-        'style_type': '1',
-        'pic_id': '',
-        'text': content,
-        'pdetail': '',
-        'rank': '',
-        'module': 'stissue',
-        'pub_type': 'dialog',
-        '_t': '0',
-    })
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:37.0) Gecko/20100101 Firefox/37.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Referer': 'http://weibo.com/duxu0805/home?wvr=5',
-    }
-    url = 'http://weibo.com/aj/mblog/add?ajwvr=6&__rnd=' + str(int(time.time())) + '000'
-    request = urllib2.Request(url, data=post_data, headers=headers)
-    return opener.open(request).read()
+def post_new(content, pic, location):
+    client = Client(APP_KEY, APP_SECRET, CALLBACK_URL, username=USERID, password=PASSWD)
+    print client.post('statuses/upload', status=content, pic=pic, lat=location[0], long=location[1])
 
 
-def gen_content(now_time):
-    time_part = map(int, re.findall(u'\\d+', now_time))
-
-    if time_part[3] == 6:
+def gen_content(hour):
+    if hour == 6:
         return u'早上好，该起床啦~~~'
-    if time_part[3] == 8:
+    if hour == 8:
         return u'早饭时间~~~'
-    if time_part[3] == 12:
+    if hour == 12:
         return u'中午好,该去吃午饭啦~~~'
-    if time_part[3] == 18:
+    if hour == 18:
         return u'晚饭时间到，吃饭去~~~'
-    if time_part[3] == 0:
+    if hour == 0:
         return u'好晚啊，该去睡觉啦~~~'
-    if time_part[3] == 22:
+    if hour == 22:
         return u'去吃点宵夜，饿啦~~~'
-    if 1 <= time_part[3] <= 5:
+    if 1 <= hour <= 5:
         return u'午夜时分，整点报时~~~'
-    if 13 <= time_part[3] <= 17:
+    if 13 <= hour <= 17:
         return u'下午啦，旭哥的机器人整点报时~~~'
-    if time_part[3] < 12:
+    if hour < 12:
         return u'旭哥的机器人要整点报时啦~~~'
-    if time_part[3] == 19:
+    if hour == 19:
         return u'新闻联播时间，关注国家大事~~~'
     return u'晚间整点报时~~~'
 
 
-def write_log(text):
-    f = codecs.open('/data/weibo.log', 'a', 'utf-8')
-    f.write(text)
-    f.close()
+def part_of_image(path, hour):
+    part_x = hour / 6
+    part_y = hour % 6
+    img = Image.open(path)
+    x, y = img.size
+    x, y = x/6, y/4
+    box = (part_y * x, part_x * y, (1 + part_y) * x, (1 + part_x) * y)
+    tmp_path = '/data/bing_bg/%s.jpg' % str(int(time.time()))
+    img.crop(box).save(tmp_path)
+    return tmp_path
 
 
-def main():
-    now_time = unicode(datetime.datetime.now())[:19]
-    text = u'现在是' + now_time + u'，' + gen_content(now_time)
-    if not json.loads(post_weibo(text))[u'code'] == u'100000':
-        write_log(now_time + u'报时失败~~~\n')
+def get_today():
+    """
+    gen a string like '20150520'
+    """
+    return time.strftime('%Y%m%d', time.localtime())
+
+
+def gen_location():
+    # -90 - +90
+    # -180 - +180
+    return random.randint(-90, 90), random.randint(-180, 180)
+
+
+def post_hour_part():
+    now_time = unicode(datetime.datetime.now())[:16]
+    hour = map(int, re.findall(u'\\d+', now_time))[3]
+    status = u'现在是' + now_time + u'，' + gen_content(hour) + u'下面是今天bing首页壁纸的第%d/24块(将在今天最后一分钟发布完整的图片)' % (hour + 1)
+    part_img_path = part_of_image('/data/bing_bg/%s.jpg' % get_today(), hour)
+    post_new(status, open(part_img_path, 'rb'), gen_location())
+    os.remove(part_img_path)
+
+
+def post_today_bing_bg():
+    status = u'今天即将结束，把今天分成24份发出去的bing首页壁纸完整发一遍吧，晚安~~~'
+    post_new(status, open('/data/bing_bg/%s.jpg' % get_today(), 'rb'), gen_location())
 
 
 if __name__ == '__main__':
-    main()
-
+    if len(sys.argv) < 2:
+        print 'Argument wrong, need 2, got', len(sys.argv)
+    elif sys.argv[1].strip() == 'hour':
+        post_hour_part()
+    elif sys.argv[1].strip() == 'end':
+        post_today_bing_bg()
+    else:
+        print 'Unsupported argument :', sys.argv[1]
