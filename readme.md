@@ -1,17 +1,24 @@
 ##xPyToys - 我用Python写的一些小工具
 
 ---
-###微博整点报时:
-每天整点的时候通过发布一条新浪微博报时,把bing首页壁 纸的1/24发到微博,每天最后一分钟把完整壁纸发上来(需要使用到Linux的cron)
+### [mzt](https://github.com/xlzd/xPyToys/tree/master/mzt)
+下载<a href='http://www.meizitu.com/' target='_blank'><b>妹子图</b></a>的图片, 并上传到七牛, 再生成一个或多个HTML页面来直接浏览图片.
+
+| 操作 | 作用 |
+| --------   | -----  |
+| `.down_mzt.py all`      | 下载全站图片, 不论本地是否存在. | 
+| `.down_mzt.py check`         | 只是下载站上的新图. | 
+| `.upload_mzt`        |   只是下载站上的新图. | 
 
 
 ---
-###bing首页壁纸下载
-每天0时下载必应首页壁纸并上传到七牛
+### [微博整点报时](https://github.com/xlzd/xPyToys/blob/master/weibo_baoshi.py)
+每天整点的时候通过发布一条新浪微博报时, 并附带一张妹子图(需要使用到Linux的cron).
+
 
 ---
-###妹子图下载工具
-下载<a href='http://www.meizitu.com/' target='_blank'>妹子图</a>图片的工具(用在我的VPS上,下一步是同步图片到七牛).
+### [bing首页壁纸下载](https://github.com/xlzd/xPyToys/blob/master/down_bing_bg.py)
+每天下载必应首页壁纸并上传到七牛
 
 
 ---
