@@ -14,7 +14,7 @@
 ---
 ### [微博整点报时](https://github.com/xlzd/xPyToys/blob/master/weibo_baoshi.py)
 如图, 每天整点的时候通过发布一条新浪微博报时, 并附带一张妹子图(需要使用到Linux的cron).
-![mzt_weibo](http://7xi3d8.com1.z0.glb.clouddn.com/@/github/imgs/weibomzt.png)
+![mzt_weibo](http://7xi3d8.com1.z0.glb.clouddn.com/@/github/weibomzt.png)
 
 
 ---
