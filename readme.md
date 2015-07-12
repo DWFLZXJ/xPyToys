@@ -8,7 +8,7 @@
 | --------   | -----  |
 | `.down_mzt.py all`      | 下载全站图片, 不论本地是否存在. | 
 | `.down_mzt.py check`         | 只是下载站上的新图. | 
-| `.upload_mzt.py`        |   只是下载站上的新图. | 
+| `.upload_mzt.py`        |   上载图片到七牛. | 
 
 
 ---
