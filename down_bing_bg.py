@@ -59,7 +59,7 @@ def push_2_qiniu(file_path):
     try:
         q = Auth(ACCESS_KEY, SECRET_KEY)
         token = q.upload_token('duxu-info', file_path)
-        ret, info = put_file(token, file_path, file_path, mime_type="text/plain", check_crc=True)
+        ret, info = put_file(token, file_path, file_path, mime_type="image/jpeg", check_crc=True)
         return str(info).find(u'Response [200]') >= 0
     except:
         return False
