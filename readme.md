@@ -25,4 +25,6 @@
 ---
 ###xdic - 在终端查词
 ![xdic](http://7xi3d8.com1.z0.glb.clouddn.com/@/github/imgs/xdic.png)
-![xdic2](http://7xi3d8.com1.z0.glb.clouddn.com/@/github/imgs/xdic2.png) 
+![xdic2](http://7xi3d8.com1.z0.glb.clouddn.com/@/github/imgs/xdic2.png)
+
+---
