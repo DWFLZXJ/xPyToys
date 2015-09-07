@@ -108,7 +108,7 @@ class ZhCrawler(object):
         content = self.get(url)
         if not content:
             return []
-        soup = BeautifulSoup(content)
+        soup = BeautifulSoup(content, 'html.parser')
         for item in soup.find_all('div', attrs={'class': 'zm-profile-card zm-profile-section-item zg-clear no-hovercard'}):
             try:
                 lst.append({'_id': item.find('a')['href'].replace('/people/', '')})
@@ -119,7 +119,7 @@ class ZhCrawler(object):
     def crawl_one(self, uid):
         url = self.DETAIL_URL % uid
         content = self.get(url)
-        soup = BeautifulSoup(content, 'html5lib')
+        soup = BeautifulSoup(content, 'html.parser')
         result = copy.deepcopy(self.FORMAT)
         result['url'] = self.URL % uid
         result['_id'] = uid
@@ -128,7 +128,7 @@ class ZhCrawler(object):
         try:
             result['description'] = self.deal_str(soup.find('div', attrs={'class': 'zm-profile-header-description editable-group '}).find('span', attrs={'class': 'content'}).getText())
         except Exception, e:
-            print e
+            print 'description', e
         result['follow'], result['fans'] = self.parse_nums(soup.find('div', attrs={'class': 'zm-profile-side-following zg-clear'}), 2)
         result['askCount'], result['answerCount'], result['zhuanlanCnt'], result['collectionCnt'], result['editCount'] = self.parse_nums(soup.find('div', attrs={'class': 'profile-navbar'}), 5)
 
@@ -153,16 +153,14 @@ class ZhCrawler(object):
             result['avatar']['url'] = img_url
             result['avatar']['detail'] = parse_age(img_url)
         except Exception, e:
-            print e
+            print 'avatar', e
 
         return result, self.find_following(uid)
 
     def run(self):
         for _ in xrange(3):
             self._run()
-            # time.sleep(60)
-            # TODO delete
-            break
+            time.sleep(60)
 
     def _run(self):
         uid = gen_todo_id()['_id']
@@ -173,7 +171,8 @@ class ZhCrawler(object):
             print 'now uid :', uid
             try:
                 self_info, todos = self.crawl_one(uid)
-                print self_info, todos
+                print self_info
+                print todos
                 insert_todo_user(todos)
                 insert_done_user(self_info)
             except Exception, e:
@@ -181,7 +180,6 @@ class ZhCrawler(object):
                 errtimes += 1
                 pass
             uid = gen_todo_id()['_id']
-            time.sleep(0.5)
 
 
 def parse_age(url):
